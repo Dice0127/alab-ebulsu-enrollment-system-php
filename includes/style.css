@@ -1067,3 +1067,124 @@ body {
     min-width: 100px;
     text-align: center;
 }
+
+/* ============================================================
+   RESPONSIVE / MOBILE OVERRIDES
+   Added to fix mobile view — appended only, no existing rules
+   above this point were changed.
+   ============================================================ */
+
+/* Hamburger button — hidden on desktop, shown on mobile */
+.sidebar-toggle {
+    display: none;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    padding: 6px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-right: 12px;
+}
+
+/* Dark overlay behind sidebar when open on mobile */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 190;
+}
+.sidebar-overlay.sidebar-overlay-open { display: block; }
+
+@media (max-width: 900px) {
+    .topbar {
+        padding: 0 14px;
+    }
+    .sidebar-toggle {
+        display: inline-block;
+    }
+    .sys-title {
+        font-size: 14px;
+    }
+    .topbar-right {
+        gap: 8px;
+        font-size: 12px;
+    }
+    .topbar-right span {
+        display: none; /* hide "Welcome, X" text on small screens to save space */
+    }
+    .topbar-right a {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+
+    /* Sidebar becomes an off-canvas drawer instead of a fixed column */
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        z-index: 250;
+        width: 240px;
+    }
+    .sidebar.sidebar-open {
+        transform: translateX(0);
+    }
+
+    /* Content takes full width, no longer offset by sidebar */
+    .main-content,
+    .main-content-full {
+        margin-left: 0;
+        padding: 16px;
+    }
+
+    /* Stat cards stack to 2 columns, then 1 on very small screens */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    /* Multi-column forms stack into a single column */
+    .form-row,
+    .form-row-3 {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    /* Filter bars stack their inputs full-width */
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-bar input,
+    .filter-bar select {
+        min-width: 0;
+        width: 100%;
+    }
+
+    /* Modals use more of the small screen */
+    .modal,
+    .modal.modal-sm,
+    .modal.modal-lg {
+        width: 92vw;
+        padding: 20px 18px;
+    }
+
+    /* Page header wraps instead of overflowing */
+    .page-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .sys-title {
+        font-size: 13px;
+    }
+    .btn-lg {
+        width: 100%;
+    }
+}

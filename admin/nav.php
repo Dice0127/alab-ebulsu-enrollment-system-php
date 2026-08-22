@@ -2,6 +2,7 @@
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 <div class="topbar">
+    <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">&#9776;</button>
     <div class="sys-title">Alab E-BulSU — Admin Dashboard</div>
     <div class="topbar-right">
         <span>Welcome, <strong><?php echo htmlspecialchars($_SESSION['admin_user']); ?></strong></span>
@@ -10,7 +11,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
 </div>
 
-<div class="sidebar">
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="sidebar" id="sidebar">
     <div class="sidebar-logo"><img src="../Bulsu_Logo.png" alt="BulSU" style="height:40px; width:40px; margin-right:8px; vertical-align:middle;"> <span>Alab E-BulSU</span></div>
     <div class="sidebar-section">Main</div>
     <ul>
@@ -35,3 +38,34 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <li><a href="audit_log.php" <?php echo ($currentPage==='audit_log.php')?'class="active"':''; ?>>Audit Log</a></li>
     </ul>
 </div>
+
+<script>
+(function() {
+    var toggle = document.getElementById('sidebarToggle');
+    var sidebar = document.getElementById('sidebar');
+    var overlay = document.getElementById('sidebarOverlay');
+    if (!toggle || !sidebar || !overlay) return;
+
+    function openSidebar() {
+        sidebar.classList.add('sidebar-open');
+        overlay.classList.add('sidebar-overlay-open');
+    }
+    function closeSidebar() {
+        sidebar.classList.remove('sidebar-open');
+        overlay.classList.remove('sidebar-overlay-open');
+    }
+    toggle.addEventListener('click', function() {
+        if (sidebar.classList.contains('sidebar-open')) {
+            closeSidebar();
+        } else {
+            openSidebar();
+        }
+    });
+    overlay.addEventListener('click', closeSidebar);
+
+    // Close sidebar automatically when a nav link is tapped (mobile UX)
+    sidebar.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', closeSidebar);
+    });
+})();
+</script>
