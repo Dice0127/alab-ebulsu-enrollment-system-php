@@ -1,0 +1,12 @@
+# Local environment / DB credentials — never commit
+.env
+
+# Runtime files (setup lock, login rate-limit state)
+storage/*
+!storage/.htaccess
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

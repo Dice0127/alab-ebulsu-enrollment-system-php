@@ -1,0 +1,3 @@
+# Block all direct HTTP access to this folder (implementation docs
+# are for developers, never meant to be served to visitors).
+Require all denied

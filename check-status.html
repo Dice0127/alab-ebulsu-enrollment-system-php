@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Enrollment Status — Alab E-BulSU</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="includes/style.css">
+    <style>
+        .status-checker { max-width: 600px; margin: 60px auto; padding: 40px; }
+        .status-box { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 32px; }
+        .status-title { font-size: 24px; font-weight: bold; color: #fff; margin-bottom: 24px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input { width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; font-size: 14px; font-family: 'Inter', sans-serif; }
+        .form-group input::placeholder { color: rgba(255,255,255,0.4); }
+        .form-group input:focus { outline: none; border-color: rgba(162,155,254,0.6); background: rgba(162,155,254,0.15); }
+        .btn-check { width: 100%; padding: 14px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-check:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(108,92,231,0.3); }
+        .btn-check:active { transform: translateY(0); }
+        
+        .result-box { margin-top: 30px; display: none; }
+        .result-box.show { display: block; }
+        .result-box.success { background: rgba(39,174,96,0.1); border: 1px solid rgba(39,174,96,0.3); }
+        .result-box.error { background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.3); }
+        .result-box.pending { background: rgba(243,156,18,0.1); border: 1px solid rgba(243,156,18,0.3); }
+        
+        .result-box { border-radius: 8px; padding: 20px; font-size: 13px; }
+        .result-header { font-size: 16px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .result-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 12px; }
+        .result-item:last-child { border-bottom: none; }
+        .result-label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .result-value { font-size: 14px; color: #fff; font-weight: 500; }
+        
+        .status-badge { display: inline-block; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .status-badge.Pending { background: rgba(243,156,18,0.2); color: #f39c12; }
+        .status-badge.Approved { background: rgba(39,174,96,0.2); color: #27ae60; }
+        .status-badge.Rejected { background: rgba(231,76,60,0.2); color: #e74c3c; }
+        
+        .loading { text-align: center; }
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(162,155,254,0.3); border-top-color: #a29bfe; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .bg-blobs { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
+        .blob { position: absolute; border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; opacity: 0.4; }
+        .blob-1 { width: 200px; height: 200px; background: #6c5ce7; top: 10%; left: 5%; }
+        .blob-2 { width: 150px; height: 150px; background: #a29bfe; top: 60%; right: 5%; }
+        .blob-3 { width: 180px; height: 180px; background: #f39c12; bottom: 5%; left: 30%; }
+        .blob-4 { width: 140px; height: 140px; background: #00cec9; top: 20%; right: 10%; }
+    </style>
+</head>
+<body>
+<div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+</div>
+
+<div class="status-checker">
+    <div class="status-box">
+        <div class="status-title">Check Enrollment Status</div>
+        <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 24px;">
+            Enter your student number to check your enrollment status
+        </p>
+        
+        <form id="statusForm" onsubmit="checkStatus(event)">
+            <div class="form-group">
+                <label>Student Number</label>
+                <input type="text" id="studentNumber" placeholder="e.g., 2025-0001" required autofocus>
+            </div>
+            <button type="submit" class="btn-check">Check Status</button>
+        </form>
+        
+        <div id="resultBox" class="result-box">
+            <div class="result-header" id="resultHeader">
+                <span id="statusIcon">●</span>
+                <span id="statusText">Status Details</span>
+            </div>
+            
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-label">Student Name</div>
+                    <div class="result-value" id="resultName">-</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Student Number</div>
+                    <div class="result-value" id="resultStudentNumber">-</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Program</div>
+                    <div class="result-value" id="resultProgram">-</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">College</div>
+                    <div class="result-value" id="resultCollege">-</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Year Level</div>
+                    <div class="result-value" id="resultYearLevel">-</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Semester</div>
+                    <div class="result-value" id="resultSemester">-</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <div style="margin-bottom: 12px;">
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Status</div>
+                    <span class="status-badge" id="statusBadge">Pending</span>
+                </div>
+                <div style="font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.6;" id="statusMessage">
+                    Your enrollment is being reviewed.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+function checkStatus(e) {
+    e.preventDefault();
+    
+    const studentNumber = $('#studentNumber').val().trim();
+    if (!studentNumber) {
+        alert('Please enter a student number');
+        return;
+    }
+    
+    // Show loading state
+    const $btn = $('button[type="submit"]');
+    const originalText = $btn.text();
+    $btn.html('<div class="spinner" style="margin: 0 auto;"></div>').prop('disabled', true);
+    
+    $.ajax({
+        url: 'ajax/get_enrollment_status.php',
+        type: 'GET',
+        data: { mode: 'check', student_number: studentNumber },
+        dataType: 'json',
+        success: function(response) {
+            displayResult(response);
+        },
+        error: function(xhr, status, error) {
+            displayResult({
+                success: false,
+                error: 'Unable to connect to server. Please try again.'
+            });
+        },
+        complete: function() {
+            $btn.text(originalText).prop('disabled', false);
+        }
+    });
+}
+
+function displayResult(response) {
+    const $resultBox = $('#resultBox');
+    
+    if (!response.success) {
+        $resultBox.removeClass('show success pending error');
+        $resultBox.addClass('show error');
+        $('#statusHeader').html('<span>❌</span> <span>Not Found</span>');
+        $('#statusText').text(response.error || 'No enrollment record found for this student number.');
+        $resultBox.find('.result-grid').html(
+            '<div style="grid-column: 1/-1; color: rgba(255,255,255,0.7);">Please check the student number and try again.</div>'
+        );
+        return;
+    }
+    
+    // Show results
+    $resultBox.addClass('show');
+    $resultBox.removeClass('error pending success');
+    
+    const status = response.status;
+    const statusClass = status.toLowerCase();
+    $resultBox.addClass(statusClass);
+    
+    // Set status badge
+    const $badge = $('#statusBadge');
+    $badge.removeClass('Pending Approved Rejected').addClass(status);
+    $badge.text(status);
+    
+    // Set header
+    const icons = { 'Pending': '⏳', 'Approved': '✓', 'Rejected': '✗' };
+    const icon = icons[status] || '●';
+    $('#statusHeader').html(`<span>${icon}</span> <span>${status} Enrollment</span>`);
+    
+    // Set result values
+    $('#resultName').text(response.studentName || '-');
+    $('#resultStudentNumber').text(response.studentNumber || '-');
+    $('#resultProgram').text(response.program || '-');
+    $('#resultCollege').text(response.college || '-');
+    $('#resultYearLevel').text(response.yearLevel || '-');
+    $('#resultSemester').text(response.semester || '-');
+    
+    // Set message
+    $('#statusMessage').text(response.statusMessage || 'Check back later for updates.');
+}
+
+// Focus on input on page load
+$(function() {
+    $('#studentNumber').focus();
+});
+</script>
+</body>
+</html>

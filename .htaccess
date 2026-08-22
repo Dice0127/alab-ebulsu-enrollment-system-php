@@ -1,0 +1,34 @@
+# ============================================================
+#  .htaccess — blocks direct HTTP access to files that should
+#  never be requested by a browser (env config, SQL dumps,
+#  docs, and other non-public source files).
+#
+#  Without this, deploying the project as-is to a real Apache
+#  server (not just local XAMPP) would let anyone download
+#  .env (DB credentials) or the .sql dumps (full schema + any
+#  data) just by guessing the URL.
+#
+#  Apache 2.4+ syntax (XAMPP ships 2.4+, so this is safe):
+# ============================================================
+
+# Block by extension, anywhere in the project
+<FilesMatch "\.(env|sql|md|log|lock)$">
+    Require all denied
+</FilesMatch>
+
+# Block the docs/ and storage/ folders outright (implementation
+# notes and runtime files like the setup lock / rate-limit state
+# have no reason to ever be served over HTTP). DirectoryMatch is
+# NOT valid inside .htaccess (server-config context only), so this
+# is handled by separate .htaccess files placed directly inside
+# docs/ and storage/ instead — see those folders.
+
+# Extra belt-and-suspenders: explicitly deny the .env file by
+# name in case an extension rule above is ever removed/changed
+<Files ".env">
+    Require all denied
+</Files>
+
+# Prevent directory listings from exposing file names in folders
+# that don't have their own index.php (e.g. includes/, ajax/)
+Options -Indexes
