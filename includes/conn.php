@@ -5,10 +5,21 @@
 // ============================================================
 require_once __DIR__ . '/env.php';
 
-$db_host = getenv('DB_HOST') ?: 'localhost';
-$db_user = getenv('DB_USER') ?: 'root';
-$db_pass = getenv('DB_PASS') ?: '';
-$db_name = getenv('DB_NAME') ?: 'websys_db';
+// getenv() can be unreliable on some shared hosts where putenv() is
+// disabled for security reasons (open_basedir/suexec setups). load_env()
+// also populates $_ENV and $_SERVER directly, so fall back to those.
+function env_get(string $key, string $default = ''): string {
+    $v = getenv($key);
+    if ($v !== false && $v !== '') return $v;
+    if (!empty($_ENV[$key])) return $_ENV[$key];
+    if (!empty($_SERVER[$key])) return $_SERVER[$key];
+    return $default;
+}
+
+$db_host = env_get('DB_HOST', 'localhost');
+$db_user = env_get('DB_USER', 'root');
+$db_pass = env_get('DB_PASS', '');
+$db_name = env_get('DB_NAME', 'websys_db');
 
 $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
 
